@@ -1,3 +1,7 @@
+[X-CONTROLS]
+
+# NOTE: Make a symlink to this file in the ClyphX Pro user config folder
+
 _SEND_MACRO = CC, 11, 5, 0, 127, skamz_send_macro
 _REC_4B = CC, 11, 14, 0, 127, REC ON; WAITS 4B; REC OFF
 _REC_8B = CC, 11, 3, 0, 127, REC ON; WAITS 8B; REC OFF
@@ -16,3 +20,5 @@ _LOOP_REC_IN = CC, 11, 0, 0, 127, looprecin
 _RESET_STATE = CC, 11, 2, 0, 127, resetstate
 _LISTEN = CC, 11, 6, 0, 127, listen
 _TEST = CC, 2, 65, 0, 127, METRO
+
+
