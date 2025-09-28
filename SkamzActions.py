@@ -25,6 +25,14 @@ class SkamzActions(UserActionsBase):
 
         self.add_global_action("exsolo", self.exsolo)
         self.add_global_action("tweak_knobs", self.tweak_knobs)
+        self.add_global_action("go_to_start_and_stop", self.go_to_start_and_stop)
+
+    def _run_cmd(self, cmd):
+        self.canonical_parent.clyphx_pro_component.trigger_action_list(cmd)
+
+    def go_to_start_and_stop(self, action_def, args):
+        cmd = "SETPLAY ON; RESTART; SETPLAY OFF;"
+        self._run_cmd(cmd)
 
     def tweak_knobs(self, action_def, args):
         instrument_name = "Skamz MultiMap"
@@ -42,7 +50,7 @@ class SkamzActions(UserActionsBase):
     # Note that the track name cannot have spaces.
     def exsolo(self, action_def, args):
         cmd = f"ALL/SOLO OFF; {args}/SOLO ON;"
-        self.canonical_parent.clyphx_pro_component.trigger_action_list(cmd)
+        self._run_cmd(cmd)
 
     # Tracks prefixed with "IN_" will be set to monitor in
     def retain_input_tracks(self):
@@ -51,7 +59,7 @@ class SkamzActions(UserActionsBase):
             if track.name.startswith("IN_") or track.name.startswith("REC_IN_"):
                 cmd += f"\"{track.name}\"/MON IN;"
         self.canonical_parent.show_message(cmd)
-        self.canonical_parent.clyphx_pro_component.trigger_action_list(cmd)
+        self._run_cmd(cmd)
 
     def retain_rec_tracks(self):
         cmd = ""
@@ -59,7 +67,7 @@ class SkamzActions(UserActionsBase):
             if track.name.startswith("REC_"):
                 cmd += f"\"{track.name}\"/ARM ON;"
         self.canonical_parent.show_message(cmd)
-        self.canonical_parent.clyphx_pro_component.trigger_action_list(cmd)
+        self._run_cmd(cmd)
 
 
     def showstate(self, action_def, args):
@@ -83,7 +91,7 @@ class SkamzActions(UserActionsBase):
             self._looprecin = False
             self._looprec = False
             cmd = f"ALL/ARM OFF; ALL/MON AUTO;"
-            self.canonical_parent.clyphx_pro_component.trigger_action_list(cmd)
+            self._run_cmd(cmd)
         self.canonical_parent.show_message("listen set to {}".format(getattr(self, "_listen", False)))
         self.retain_input_tracks()
         self.retain_rec_tracks()
@@ -102,7 +110,7 @@ class SkamzActions(UserActionsBase):
             cmd = f"ALL/ARM OFF; ALL/MON AUTO; \"LOOPBACK\"/ARM ON;"
         else:
             cmd = f"ALL / MON AUTO; ALL/ARM OFF;"
-        self.canonical_parent.clyphx_pro_component.trigger_action_list(cmd)
+        self._run_cmd(cmd)
         self.canonical_parent.show_message("looprec set to {}".format(getattr(self, "_looprec", False)))
 
     # looprec = "loop record in"
@@ -119,7 +127,7 @@ class SkamzActions(UserActionsBase):
             cmd = f"ALL/ARM OFF; ALL / MON AUTO; \"LOOPBACK\"/ARM ON;"
         else:
             cmd = f"ALL / MON AUTO; ALL/ARM OFF;"
-        self.canonical_parent.clyphx_pro_component.trigger_action_list(cmd)
+        self._run_cmd(cmd)
         self.canonical_parent.show_message("looprecin set to {}".format(getattr(self, "_looprecin", False)))
 
     # noin = "no inputs"
@@ -130,7 +138,7 @@ class SkamzActions(UserActionsBase):
             cmd = f"ALL/MON AUTO;"
         else:
             cmd = f"ALL/ARM OFF; ALL/MON AUTO;"
-        self.canonical_parent.clyphx_pro_component.trigger_action_list(cmd)
+        self._run_cmd(cmd)
         self.retain_input_tracks()
         self.retain_rec_tracks()
     # exarm = "exclusive arm"
@@ -143,7 +151,7 @@ class SkamzActions(UserActionsBase):
         args = args.split()
         track_name = args[0]
         cmd = f"ALL/ARM OFF; {track_name}/ARM ON;"
-        self.canonical_parent.clyphx_pro_component.trigger_action_list(cmd)
+        self._run_cmd(cmd)
 
     # exarmin = "exclusive arm and input"
     # Turns recording on for the named track, and off for all others.
@@ -159,7 +167,7 @@ class SkamzActions(UserActionsBase):
             cmd = f"ALL/MON AUTO; {track_name}/MON IN;"
         else:
             cmd = f"ALL/ARM OFF; {track_name}/ARM ON; ALL/MON AUTO; {track_name}/MON IN;"
-        self.canonical_parent.clyphx_pro_component.trigger_action_list(cmd)
+        self._run_cmd(cmd)
         self.retain_input_tracks()
         self.retain_rec_tracks()
     
@@ -167,7 +175,7 @@ class SkamzActions(UserActionsBase):
         args = args.split()
         track_name = args[0]
         cmd = f"ALL/MON AUTO; {track_name}/MON IN;"
-        self.canonical_parent.clyphx_pro_component.trigger_action_list(cmd)
+        self._run_cmd(cmd)
         self.retain_input_tracks()
 
     # armin = "arm and input"
@@ -183,7 +191,7 @@ class SkamzActions(UserActionsBase):
             cmd = f"{track_name}/MON IN;"
         else:
             cmd = f"{track_name}/ARM ON; {track_name}/MON IN;"
-        self.canonical_parent.clyphx_pro_component.trigger_action_list(cmd)
+        self._run_cmd(cmd)
         self.retain_input_tracks()
         self.retain_rec_tracks()
 
@@ -209,14 +217,14 @@ class SkamzActions(UserActionsBase):
     def play(self, action_def, _):
         if not self._song.is_playing:
             # Counter-intuitively, SETSTOP actually toggles playback.
-            self.canonical_parent.clyphx_pro_component.trigger_action_list("SETSTOP")
+            self._run_cmd("SETSTOP")
 
     def stop_or_reset(self, action_def, _):
         if self._song.is_playing:
-            self.canonical_parent.clyphx_pro_component.trigger_action_list("SETSTOP")
+            self._run_cmd("SETSTOP")
         else:
-            self.canonical_parent.clyphx_pro_component.trigger_action_list("SETJUMP 1.1.1")
+            self._run_cmd("SETJUMP 1.1.1")
 
     def load_device_definition(self, action_def, _):
         name = self._song.view.selected_track.view.selected_device.name
-        self.canonical_parent.clyphx_pro_component.trigger_action_list(f'SWAP "{name}.adg"')
+        self._run_cmd(f'SWAP "{name}.adg"')
