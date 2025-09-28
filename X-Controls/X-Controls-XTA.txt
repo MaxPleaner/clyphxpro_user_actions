@@ -1,1 +1,0 @@
-STOP_BTN = CC, 1, 0, 0, 127, go_to_start_and_stop
